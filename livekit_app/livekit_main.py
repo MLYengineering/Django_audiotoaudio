@@ -118,8 +118,8 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.Participant):
     
     model=openai.realtime.RealtimeModel.with_azure(
         azure_deployment="gpt-4o-realtime-preview",
-        azure_endpoint=os.getenv("AZURE_ENDPOINT")
-        api_key=
+        azure_endpoint=os.getenv("AZURE_ENDPOINT"),
+        api_key=os.getenv("API_KEY"),
         api_version="2024-10-01-preview", # or OPENAI_API_VERSION
         voice="alloy",
         temperature=0.8,
