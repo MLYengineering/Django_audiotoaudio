@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
+    <title>LiveKit Audio Room</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        #controls {
+            margin-bottom: 20px;
+        }
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>LiveKit Audio Room: {{ room_name }}</h1>
+    <div id="controls">
+        <button id="joinBtn">Join</button>
+        <button id="leaveBtn" disabled>Leave</button>
+    </div>
+    <div id="status">Not connected</div>
+
+    <!-- LiveKit Client SDK von CDN laden -->
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client@1.6.8/dist/livekit-client.umd.js"></script>
+
+    <script>document.addEventListener('DOMContentLoaded', () => {
+      const wsUrl = "{{ livekit_ws_url }}";
+      const token = "{{ token }}";
+  
+      let room;
+      const joinBtn = document.getElementById('joinBtn');
+      const leaveBtn = document.getElementById('leaveBtn');
+      const statusDiv = document.getElementById('status');
+  
+      joinBtn.addEventListener('click', async () => {
+          try {
+              room = new window.LiveKitClient.Room();
+              await room.connect(wsUrl, token);
+              console.log("Connected to room:", room.name);
+              statusDiv.textContent = "Connected to " + room.name;
+  
+              joinBtn.disabled = true;
+              leaveBtn.disabled = false;
+  
+              // Create and publish local audio track
+              const micTrack = await window.LiveKitClient.createLocalAudioTrack();
+              await room.localParticipant.publishTrack(micTrack);
+  
+              // Handle remote participants' audio tracks
+              room.on('trackSubscribed', (track, publication, participant) => {
+                  if (track.kind === 'audio') {
+                      const audioElement = track.attach();
+                      audioElement.autoplay = true;
+                      audioElement.play().catch(e => console.error('Playback error:', e));
+                  }
+              });
+  
+              room.on('participantDisconnected', (participant) => {
+                  console.log("Participant disconnected:", participant.identity);
+              });
+  
+          } catch (err) {
+              console.error("Error connecting to room:", err);
+              statusDiv.textContent = "Error connecting";
+          }
+      });
+  
+      leaveBtn.addEventListener('click', () => {
+          if (room) {
+              room.disconnect();
+              joinBtn.disabled = false;
+              leaveBtn.disabled = true;
+              statusDiv.textContent = "Not connected";
+          }
+      });
+  });
+    </script>
+</body>
+</html>
