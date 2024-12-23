@@ -6,7 +6,7 @@ import logging
 import uuid
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Literal
-
+import os
 import ssl
 import certifi
 
@@ -118,9 +118,8 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.Participant):
     
     model=openai.realtime.RealtimeModel.with_azure(
         azure_deployment="gpt-4o-realtime-preview",
-        #azure_endpoint="https://aigdopenai.openai.azure.com/openai/realtime?api-version=2024-10-01-preview&deployment=gpt-4o-realtime-preview", # or AZURE_OPENAI_ENDPOINT
-        azure_endpoint="https://aigdopenai.openai.azure.com/", # or AZURE_OPENAI_ENDPOINT
-        api_key="708dd07c0b884ffd89f6d948cc5f5df1", # or AZURE_OPENAI_API_KEY
+        azure_endpoint=os.getenv("AZURE_ENDPOINT")
+        api_key=
         api_version="2024-10-01-preview", # or OPENAI_API_VERSION
         voice="alloy",
         temperature=0.8,
